@@ -1,0 +1,20 @@
+name: retail_lakehouse
+version: 1.0.0
+config-version: 2
+profile: retail_lakehouse
+model-paths: ["models/v2"]
+test-paths: ["tests/v2"]
+snapshot-paths: ["snapshots/v2"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+clean-targets: ["target", "dbt_packages"]
+models:
+  retail_lakehouse:
+    +file_format: delta
+    silver: {+materialized: table, +schema: silver}
+    intermediate: {+materialized: view, +schema: intermediate}
+    gold: {+materialized: table, +schema: gold}
+snapshots:
+  retail_lakehouse:
+    +target_schema: snapshots
+    +file_format: delta

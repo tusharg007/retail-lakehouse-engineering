@@ -1,0 +1,15 @@
+retail_lakehouse:
+  target: dev
+  outputs:
+    dev:
+      type: spark
+      method: thrift
+      host: "{{ env_var('SPARK_THRIFT_HOST', 'spark-thrift') }}"
+      port: "{{ env_var('SPARK_THRIFT_PORT', '10000') | int }}"
+      user: retail
+      schema: default
+      auth: NONE
+      threads: 1
+      connect_retries: 5
+      connect_timeout: 60
+      retry_all: true

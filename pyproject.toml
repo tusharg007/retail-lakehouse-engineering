@@ -1,0 +1,12 @@
+[project]
+name = "retail-lakehouse"
+version = "1.0.0"
+description = "Local Spark/Delta retail lakehouse with PostgreSQL CDC and AWS S3 input"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

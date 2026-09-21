@@ -1,0 +1,157 @@
+name: retail-lakehouse
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: infra/airflow/Dockerfile
+  env_file:
+    - .env
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/retail/dags
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@airflow-postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.session
+    RETAIL_SOURCE_DSN: postgresql://retail:${SOURCE_DB_PASSWORD}@source-postgres:5432/retail
+    RETAIL_LAKEHOUSE_ROOT: /opt/lakehouse
+    DBT_PROFILES_DIR: /opt/retail/dbt
+    SPARK_THRIFT_HOST: spark-thrift
+    SPARK_THRIFT_PORT: "10000"
+    PYTHONPATH: /opt/retail:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+  volumes:
+    - ./:/opt/retail:ro
+    - lakehouse-data:/opt/lakehouse
+    - airflow-logs:/opt/airflow/logs
+  depends_on:
+    volume-init:
+      condition: service_completed_successfully
+    source-postgres:
+      condition: service_healthy
+    airflow-postgres:
+      condition: service_healthy
+    spark-thrift:
+      condition: service_started
+
+services:
+  volume-init:
+    image: alpine:3.20
+    command: >-
+      sh -c "mkdir -p /opt/lakehouse /opt/spark-catalog &&
+      chmod -R 0777 /opt/lakehouse /opt/spark-catalog"
+    volumes:
+      - lakehouse-data:/opt/lakehouse
+      - spark-catalog:/opt/spark-catalog
+    restart: "no"
+  source-postgres:
+    image: postgres:16.4-bookworm
+    environment:
+      POSTGRES_DB: retail
+      POSTGRES_USER: retail
+      POSTGRES_PASSWORD: ${SOURCE_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:${SOURCE_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - source-postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retail -d retail"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  airflow-postgres:
+    image: postgres:16.4-bookworm
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD}
+    volumes:
+      - airflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  spark-thrift:
+    depends_on:
+      volume-init:
+        condition: service_completed_successfully
+    build:
+      context: .
+      dockerfile: infra/spark/Dockerfile
+    environment:
+      SPARK_MODE: master
+      SPARK_NO_DAEMONIZE: "true"
+    command: >-
+      bash -c "/opt/spark/sbin/start-thriftserver.sh --master local[2]
+      --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension
+      --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
+      --conf spark.sql.warehouse.dir=/opt/lakehouse/warehouse
+      --conf 'spark.hadoop.javax.jdo.option.ConnectionURL=jdbc:derby:/opt/spark-catalog/metastore_db;create=true'
+      && while true; do sleep 3600; done"
+    ports:
+      - "127.0.0.1:${SPARK_UI_PORT:-4040}:4040"
+    volumes:
+      - lakehouse-data:/opt/lakehouse
+      - spark-catalog:/opt/spark-catalog
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/spark/bin/beeline -u jdbc:hive2://localhost:10000/default -n retail -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 45s
+
+  airflow-init:
+    <<: *airflow-common
+    command: >-
+      bash -c "airflow db migrate && airflow users create
+      --username ${AIRFLOW_ADMIN_USERNAME:-admin}
+      --password ${AIRFLOW_ADMIN_PASSWORD}
+      --firstname Retail --lastname Admin
+      --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-admin@localhost} || true"
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "127.0.0.1:${AIRFLOW_PORT:-8080}:8080"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: infra/dashboard/Dockerfile
+    env_file:
+      - .env
+    environment:
+      SPARK_THRIFT_HOST: spark-thrift
+      SPARK_THRIFT_PORT: "10000"
+    ports:
+      - "127.0.0.1:${DASHBOARD_PORT:-8501}:8501"
+    volumes:
+      - ./:/opt/retail:ro
+    depends_on:
+      spark-thrift:
+        condition: service_healthy
+    profiles: [dashboard]
+
+volumes:
+  source-postgres-data:
+  airflow-postgres-data:
+  airflow-logs:
+  lakehouse-data:
+  spark-catalog:

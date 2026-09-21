@@ -1,0 +1,1 @@
+select customer_id, first_name, last_name, email, phone, city, province, country, cast(created_timestamp as timestamp) created_timestamp, cast(updated_timestamp as timestamp) updated_timestamp, is_active, event_id source_event_id, occurred_at source_observed_at from delta.`/opt/lakehouse/bronze/customers` where not is_deleted

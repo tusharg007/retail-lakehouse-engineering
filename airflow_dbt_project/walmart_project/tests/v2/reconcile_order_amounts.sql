@@ -1,0 +1,1 @@
+select 1 from (select (select sum(gross_order_amount) from {{ ref('fact_orders') }}) order_total, (select sum(line_amount) from {{ ref('fact_order_items') }}) line_total) r where order_total <> line_total

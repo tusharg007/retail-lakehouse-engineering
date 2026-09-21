@@ -1,0 +1,5 @@
+version: 2
+sources:
+  - name: bronze
+    schema: bronze
+    tables: [{name: customers}, {name: stores}, {name: products}, {name: employees}, {name: orders}, {name: order_items}]

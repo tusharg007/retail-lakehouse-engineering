@@ -1,0 +1,31 @@
+# Credentials and machine state
+.env
+.env.*
+!.env.example
+!.env.*.example
+.databrickscfg
+.databricks/
+*.pem
+*.key
+secrets/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+Thumbs.db
+# Generated outputs; publish only reviewed, sanitized evidence.
+**/logs/
+**/target/
+**/dbt_packages/
+**/.user.yml
+/airflow_dbt_project/config/airflow.cfg
+/artifacts/
+/exports/
+/state/
+*.log
+*.tfstate
+*.tfstate.*
+.terraform/

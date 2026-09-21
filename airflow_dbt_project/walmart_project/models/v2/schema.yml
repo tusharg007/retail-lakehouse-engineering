@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: customers
+    columns: [{name: customer_id, data_tests: [not_null, unique]}]
+  - name: stores
+    columns: [{name: store_id, data_tests: [not_null, unique]}]
+  - name: products
+    columns: [{name: product_id, data_tests: [not_null, unique]}]
+  - name: employees
+    columns:
+      - {name: employee_id, data_tests: [not_null, unique]}
+      - name: store_id
+        data_tests: [{relationships: {to: ref('stores'), field: store_id}}]
+  - name: orders
+    columns:
+      - {name: order_id, data_tests: [not_null, unique]}
+      - name: customer_id
+        data_tests: [{relationships: {to: ref('customers'), field: customer_id}}]
+      - name: store_id
+        data_tests: [{relationships: {to: ref('stores'), field: store_id}}]
+  - name: order_items
+    columns:
+      - {name: order_item_id, data_tests: [not_null, unique]}
+      - name: order_id
+        data_tests: [{relationships: {to: ref('orders'), field: order_id}}]
+      - name: product_id
+        data_tests: [{relationships: {to: ref('products'), field: product_id}}]
+  - name: fact_orders
+    columns: [{name: order_id, data_tests: [not_null, unique]}]
+  - name: fact_order_items
+    columns: [{name: order_item_id, data_tests: [not_null, unique]}]

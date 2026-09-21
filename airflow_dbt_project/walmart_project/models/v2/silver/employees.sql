@@ -1,0 +1,1 @@
+select employee_id, store_id, first_name, last_name, email, job_title, cast(salary as decimal(10,2)) salary, cast(created_timestamp as timestamp) created_timestamp, cast(updated_timestamp as timestamp) updated_timestamp, is_active, event_id source_event_id, occurred_at source_observed_at from delta.`/opt/lakehouse/bronze/employees` where not is_deleted

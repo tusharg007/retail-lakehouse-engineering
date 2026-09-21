@@ -1,0 +1,1 @@
+select product_id, product_name, category, brand, cast(price as decimal(10,2)) price, cast(created_timestamp as timestamp) created_timestamp, cast(updated_timestamp as timestamp) updated_timestamp, is_active, event_id source_event_id, occurred_at source_observed_at from delta.`/opt/lakehouse/bronze/products` where not is_deleted
