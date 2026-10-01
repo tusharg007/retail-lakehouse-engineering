@@ -34,6 +34,10 @@ flowchart LR
 
 **Keep the local stack reproducible.** Docker Compose runs the source database, Airflow metadata database, Spark Thrift Server, and Airflow services. Delta tables live in named volumes so application containers can be rebuilt without losing lakehouse data.
 
+## Engineering deep dives
+
+- [PostgreSQL Query Plan Lab & OLTP-to-OLAP Walkthrough](docs/query_plan_lab.md)
+
 ## Verified execution
 
 The pipeline was run locally from a fresh Docker stack.
