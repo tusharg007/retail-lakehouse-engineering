@@ -33,7 +33,7 @@ def upload_snapshot(data_dir: Path, sequence: int, settings: Settings) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sequence", type=int, required=True)
-    parser.add_argument("--data-dir", type=Path, default=Path(__file__).resolve().parents[1] / "walmart_dataset" / "data")
+    parser.add_argument("--data-dir", type=Path, default=Path(__file__).resolve().parents[1] / "retail_dataset" / "data")
     args = parser.parse_args()
     print(json.dumps(upload_snapshot(args.data_dir, args.sequence, Settings.from_env())))
     return 0

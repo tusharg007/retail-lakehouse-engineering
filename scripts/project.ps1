@@ -33,9 +33,9 @@ switch ($Action) {
   'stop' { Invoke-Compose @('stop') }
   'status' { Invoke-Compose @('ps') }
   'logs' { Invoke-Compose @('logs','--tail','100') }
-  'load' { Invoke-Compose @('run','--rm','airflow-scheduler','python','/opt/retail/walmart_dataset/load_data.py') }
+  'load' { Invoke-Compose @('run','--rm','--entrypoint','python','airflow-scheduler','/opt/retail/retail_dataset/load_data.py') }
   'run' { Invoke-Compose @('exec','airflow-scheduler','airflow','dags','trigger','retail_lakehouse') }
-  's3-check' { Invoke-Compose @('run','--rm','airflow-scheduler','python','-m','pipelines.s3_files','check') }
-  's3-upload' { Invoke-Compose @('run','--rm','airflow-scheduler','python','-m','pipelines.s3_upload','--sequence',$Sequence) }
-  'verify' { powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\audit_dataset.ps1'); Invoke-Compose @('run','--rm','airflow-scheduler','/opt/dbt-venv/bin/dbt','parse','--project-dir','/opt/retail/airflow_dbt_project/walmart_project','--profiles-dir','/opt/retail/airflow_dbt_project/walmart_project','--target-path','/opt/lakehouse/dbt-target','--log-path','/opt/lakehouse/dbt-logs') }
+  's3-check' { Invoke-Compose @('run','--rm','--entrypoint','python','airflow-scheduler','-m','pipelines.s3_files','check') }
+  's3-upload' { Invoke-Compose @('run','--rm','--entrypoint','python','airflow-scheduler','-m','pipelines.s3_upload','--sequence',$Sequence) }
+  'verify' { powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\audit_dataset.ps1'); Invoke-Compose @('run','--rm','--entrypoint','/opt/dbt-venv/bin/dbt','airflow-scheduler','parse','--project-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--profiles-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--target-path','/opt/lakehouse/dbt-target','--log-path','/opt/lakehouse/dbt-logs') }
 }

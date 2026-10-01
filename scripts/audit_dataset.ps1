@@ -1,5 +1,5 @@
 param(
-    [string]$DataDirectory = (Join-Path $PSScriptRoot '../walmart_dataset/data'),
+    [string]$DataDirectory = (Join-Path $PSScriptRoot '../retail_dataset/data'),
     [string]$OutputPath = (Join-Path $PSScriptRoot '../docs/evidence/dataset-audit.json')
 )
 $ErrorActionPreference = 'Stop'

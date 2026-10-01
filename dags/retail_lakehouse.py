@@ -49,7 +49,7 @@ def retail_lakehouse():
     def dbt_build(result: dict) -> dict:
         if not result.get("batch_id"):
             return result
-        completed = subprocess.run(["/opt/dbt-venv/bin/dbt", "build", "--project-dir", str(REPO / "airflow_dbt_project" / "walmart_project"), "--profiles-dir", str(REPO / "airflow_dbt_project" / "walmart_project"), "--target-path", "/opt/lakehouse/dbt-target", "--log-path", "/opt/lakehouse/dbt-logs"], cwd=REPO, text=True, capture_output=True)
+        completed = subprocess.run(["/opt/dbt-venv/bin/dbt", "build", "--project-dir", str(REPO / "airflow_dbt_project" / "retail_lakehouse"), "--profiles-dir", str(REPO / "airflow_dbt_project" / "retail_lakehouse"), "--target-path", "/opt/lakehouse/dbt-target", "--log-path", "/opt/lakehouse/dbt-logs"], cwd=REPO, text=True, capture_output=True)
         if completed.returncode:
             raise AirflowFailException(completed.stdout[-2000:] + completed.stderr[-2000:])
         from pipelines.config import Settings
