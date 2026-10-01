@@ -37,5 +37,5 @@ switch ($Action) {
   'run' { Invoke-Compose @('exec','airflow-scheduler','airflow','dags','trigger','retail_lakehouse') }
   's3-check' { Invoke-Compose @('run','--rm','--entrypoint','python','airflow-scheduler','-m','pipelines.s3_files','check') }
   's3-upload' { Invoke-Compose @('run','--rm','--entrypoint','python','airflow-scheduler','-m','pipelines.s3_upload','--sequence',$Sequence) }
-  'verify' { powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\audit_dataset.ps1'); Invoke-Compose @('run','--rm','--entrypoint','/opt/dbt-venv/bin/dbt','airflow-scheduler','parse','--project-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--profiles-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--target-path','/opt/lakehouse/dbt-target','--log-path','/opt/lakehouse/dbt-logs') }
+  'verify' { python (Join-Path $root 'scripts\audit_dataset.py'); if ($LASTEXITCODE) { throw "Dataset audit failed ($LASTEXITCODE)" }; Invoke-Compose @('run','--rm','--entrypoint','/opt/dbt-venv/bin/dbt','airflow-scheduler','parse','--project-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--profiles-dir','/opt/retail/airflow_dbt_project/retail_lakehouse','--target-path','/opt/lakehouse/dbt-target','--log-path','/opt/lakehouse/dbt-logs') }
 }

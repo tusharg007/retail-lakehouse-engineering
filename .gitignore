@@ -23,6 +23,7 @@ Thumbs.db
 **/.user.yml
 /airflow_dbt_project/config/airflow.cfg
 /artifacts/
+/docs/evidence/dataset-audit.json
 /exports/
 /state/
 *.log

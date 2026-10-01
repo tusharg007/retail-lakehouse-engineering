@@ -52,7 +52,7 @@ The pipeline was run locally from a fresh Docker stack.
 
 ## Run it locally
 
-**Requirements:** Docker Desktop running, PowerShell, and sufficient Docker memory for Airflow and Spark. AWS credentials are only required for S3 commands.
+**Requirements:** Docker Desktop running, PowerShell, Python 3.11+ for `verify`, and sufficient Docker memory for Airflow and Spark. AWS credentials are only required for S3 commands.
 
 ```powershell
 # Create local configuration and generate service secrets

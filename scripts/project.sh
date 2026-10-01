@@ -18,6 +18,6 @@ case "$ACTION" in
   run) compose exec airflow-scheduler airflow dags trigger retail_lakehouse ;;
   s3-check) compose run --rm --entrypoint python airflow-scheduler -m pipelines.s3_files check ;;
   s3-upload) compose run --rm --entrypoint python airflow-scheduler -m pipelines.s3_upload --sequence "${1:?sequence required}" ;;
-  verify) "$ROOT/scripts/audit_dataset.ps1"; compose run --rm --entrypoint /opt/dbt-venv/bin/dbt airflow-scheduler parse --project-dir /opt/retail/airflow_dbt_project/retail_lakehouse --profiles-dir /opt/retail/airflow_dbt_project/retail_lakehouse ;;
+  verify) python3 "$ROOT/scripts/audit_dataset.py"; compose run --rm --entrypoint /opt/dbt-venv/bin/dbt airflow-scheduler parse --project-dir /opt/retail/airflow_dbt_project/retail_lakehouse --profiles-dir /opt/retail/airflow_dbt_project/retail_lakehouse --target-path /opt/lakehouse/dbt-target --log-path /opt/lakehouse/dbt-logs ;;
   *) exit 2 ;;
 esac
