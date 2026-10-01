@@ -1,4 +1,4 @@
-# Retail Lakehouse Pipeline
+# Retail Lakehouse Engineering
 
 A local-first retail data platform that ingests transactional change events from PostgreSQL, stores them as Delta Lake tables, and produces tested analytics models with dbt. Apache Airflow coordinates the pipeline; AWS S3 remains the external file-delivery boundary for versioned source bundles.
 
@@ -113,8 +113,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\project.ps1 s3-upload -Sequen
 ├── infra/airflow/                Airflow image and dbt runtime
 ├── infra/spark/                  Spark and Delta image
 ├── airflow_dbt_project/
-│   └── walmart_project/          dbt models, snapshots, and tests
-├── walmart_dataset/              Included CSV data and source loader
+│   └── retail_lakehouse/         dbt models, snapshots, and tests
+├── retail_dataset/               Included CSV data and source loader
 ├── scripts/                      PowerShell commands for operating the stack
 ├── compose.yaml                  Local service topology
 └── .env.example                  Required configuration keys
@@ -122,4 +122,6 @@ powershell -ExecutionPolicy Bypass -File .\scripts\project.ps1 s3-upload -Sequen
 
 ## Credentials and data
 
-`.env` is excluded from Git and holds local passwords and AWS credentials. The included retail data is provided for reproducibility. This project demonstrates data-engineering patterns and does not represent production systems or operational data from Walmart.
+`.env` is excluded from Git and holds local passwords and AWS credentials.
+
+Dataset provenance: this repository includes a retail CSV dataset for local pipeline demonstration. The repository does not contain enough provenance metadata to independently establish the dataset's original source. Walmart-branded store names in the sample data do not represent access to Walmart systems or operational data.

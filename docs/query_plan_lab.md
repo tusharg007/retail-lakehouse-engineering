@@ -202,7 +202,7 @@ For each source entity, PySpark selects the event payload, marks deletes as `is_
 
 ### Silver: typed business entities
 
-The dbt silver models read the Delta bronze paths, filter out `is_deleted` rows, and cast fields to analytics types. For example, `models/v2/silver/orders.sql` casts `order_timestamp` and `total_amount`; `models/v2/silver/order_items.sql` casts quantity and monetary fields. These models turn event-backed bronze state into entity tables suitable for downstream joins.
+The dbt silver models read the Delta bronze paths, filter out `is_deleted` rows, and cast fields to analytics types. For example, `models/silver/orders.sql` casts `order_timestamp` and `total_amount`; `models/silver/order_items.sql` casts quantity and monetary fields. These models turn event-backed bronze state into entity tables suitable for downstream joins.
 
 ### Gold: OLAP and business grain
 
@@ -218,10 +218,10 @@ The operational tables hold the current entity records and accept row-level chan
 
 The models contain executable joins and aggregations, not just configuration:
 
-- [`order_items_enriched`](../airflow_dbt_project/walmart_project/models/v2/intermediate/order_items_enriched.sql) joins line items to orders, products, and stores.
-- [`mart_daily_sales`](../airflow_dbt_project/walmart_project/models/v2/gold/mart_daily_sales.sql) uses `COUNT(DISTINCT ...)`, `COUNT(*)`, `SUM(...)`, and `GROUP BY` to define date/store/category/status grain.
-- [`order_item_grain.sql`](../airflow_dbt_project/walmart_project/tests/v2/order_item_grain.sql) uses `GROUP BY` and `HAVING count(*) <> 1` to return duplicate keys as test failures.
-- [`reconcile_order_amounts.sql`](../airflow_dbt_project/walmart_project/tests/v2/reconcile_order_amounts.sql) compares summed order and line amounts and returns a failing row when they differ.
+- [`order_items_enriched`](../airflow_dbt_project/retail_lakehouse/models/intermediate/order_items_enriched.sql) joins line items to orders, products, and stores.
+- [`mart_daily_sales`](../airflow_dbt_project/retail_lakehouse/models/gold/mart_daily_sales.sql) uses `COUNT(DISTINCT ...)`, `COUNT(*)`, `SUM(...)`, and `GROUP BY` to define date/store/category/status grain.
+- [`order_item_grain.sql`](../airflow_dbt_project/retail_lakehouse/tests/order_item_grain.sql) uses `GROUP BY` and `HAVING count(*) <> 1` to return duplicate keys as test failures.
+- [`reconcile_order_amounts.sql`](../airflow_dbt_project/retail_lakehouse/tests/reconcile_order_amounts.sql) compares summed order and line amounts and returns a failing row when they differ.
 - dbt schema tests check key uniqueness and nullability, plus relationships from orders to customers/stores and order items to orders/products.
 
 These SQL models run through dbt on Spark/Delta. The query plans above were captured against PostgreSQL source tables; they are separate engines and their plans should not be conflated.
